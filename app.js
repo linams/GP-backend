@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const faceapi = require("face-api.js");
 const path = require("path");
 const canvas = require("canvas");
+const bodyparser=require("body-parser")
 
 // Monkey-patch face-api.js for Node.js
 faceapi.env.monkeyPatch({
@@ -22,7 +23,8 @@ const corsOptions = {
   allowedHeaders: ["Content-Type"],
 };
 app.use(cors(corsOptions)); // Enable CORS
-
+app.use(bodyparser.urlencoded({extended:true}))
+app.use(bodyparser.json())
 app.use(express.json({ limit: "10mb" })); // Handle large base64 data
 
 // MongoDB Schema and Model
@@ -62,6 +64,8 @@ const imageToVector = async (base64Image) => {
 
 // Register API
 app.post("/api/register", async (req, res) => {
+  console.log(req.body)
+  console.log("data")
   const { name, email, password, photo } = req.body;
 
   if (!name || !email || !password || !photo) {
@@ -115,7 +119,7 @@ app.post("/api/enroll", async (req, res) => {
 
     // Compare the face vector with the stored vector
     const similarity = faceapi.euclideanDistance(faceVector, student.faceVector);
-    const similarityThreshold = 0.6; // Lower is better, adjust as needed
+    const similarityThreshold = 0.6; 
 
     if (similarity <= similarityThreshold) {
       res.status(200).json({ message: "Enrollment successful." });
